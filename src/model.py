@@ -1,15 +1,4 @@
-import torch
 import torch.nn as nn
-import torch.optim as optim
-from torch.utils.data import Dataset, DataLoader
-from torchvision import transforms
-import pandas as pd
-from PIL import Image
-import os
-import numpy as np
-from tqdm import tqdm
-from modelRegularization import ModelRegularization, apply_regularization
-
 
 class CIFAR10Model(nn.Module):
     def __init__(self, num_classes=10):

@@ -1,12 +1,11 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import DataLoader
 from torchvision import transforms
 import pandas as pd
 from PIL import Image
 import os
-import numpy as np
 from tqdm import tqdm
 from modelRegularization import ModelRegularization, apply_regularization
 from dataset import CIFAR10Dataset
@@ -234,3 +233,30 @@ class CIFAR10Trainer:
             _, predicted = output.max(1)
 
         return predicted.item()
+
+    def predict_test_directory(self, test_dir, output_csv="predictions.csv"):
+        """Predict classes for all images in test directory and save to CSV."""
+        idx_to_class = {
+            0: 'airplane', 1: 'automobile', 2: 'bird', 3: 'cat', 4: 'deer',
+            5: 'dog', 6: 'frog', 7: 'horse', 8: 'ship', 9: 'truck'
+        }
+
+        predictions = []
+        image_files = sorted([f for f in os.listdir(test_dir)
+                              if f.endswith(('.png', '.jpg', '.jpeg'))])
+
+        for image_file in tqdm(image_files, desc="Predicting test images"):
+            image_path = os.path.join(test_dir, image_file)
+            try:
+                class_idx = self.predict(str(image_path))
+                predictions.append({
+                    'image_name': image_file,
+                    'predicted_class': idx_to_class[class_idx]
+                })
+            except Exception as e:
+                print(f"Error predicting {image_file}: {str(e)}")
+
+        predictions_df = pd.DataFrame(predictions)
+        predictions_df.to_csv(output_csv, index=False)
+        print(f"\nPredictions saved to {output_csv}")
+        return predictions_df
