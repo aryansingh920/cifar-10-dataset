@@ -1,56 +1,35 @@
 import torch.nn as nn
 
+
 class CIFAR10Model(nn.Module):
-    def __init__(self, num_classes=10):
-        """
-        Initialize the CNN model for CIFAR-10 classification.
-        """
+    def __init__(self, num_classes=10, conv_filters=[32, 64, 128], dropout_rate=0.3, fc_units=512):
         super(CIFAR10Model, self).__init__()
 
-        # First Convolutional Block
-        self.conv1 = nn.Sequential(
-            nn.Conv2d(3, 32, kernel_size=3, padding=1),
-            nn.BatchNorm2d(32),
-            nn.ReLU(),
-            nn.Conv2d(32, 32, kernel_size=3, padding=1),
-            nn.BatchNorm2d(32),
-            nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2, stride=2),
-            nn.Dropout(0.3)
-        )
+        self.conv1 = self._make_conv_block(3, conv_filters[0], dropout_rate)
+        self.conv2 = self._make_conv_block(
+            conv_filters[0], conv_filters[1], dropout_rate)
+        self.conv3 = self._make_conv_block(
+            conv_filters[1], conv_filters[2], dropout_rate)
 
-        # Second Convolutional Block
-        self.conv2 = nn.Sequential(
-            nn.Conv2d(32, 64, kernel_size=3, padding=1),
-            nn.BatchNorm2d(64),
-            nn.ReLU(),
-            nn.Conv2d(64, 64, kernel_size=3, padding=1),
-            nn.BatchNorm2d(64),
-            nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2, stride=2),
-            nn.Dropout(0.3)
-        )
-
-        # Third Convolutional Block
-        self.conv3 = nn.Sequential(
-            nn.Conv2d(64, 128, kernel_size=3, padding=1),
-            nn.BatchNorm2d(128),
-            nn.ReLU(),
-            nn.Conv2d(128, 128, kernel_size=3, padding=1),
-            nn.BatchNorm2d(128),
-            nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2, stride=2),
-            nn.Dropout(0.3)
-        )
-
-        # Fully Connected Layers
         self.fc = nn.Sequential(
             nn.Flatten(),
-            nn.Linear(128 * 4 * 4, 512),
-            nn.BatchNorm1d(512),
+            nn.Linear(conv_filters[2] * 4 * 4, fc_units),
+            nn.BatchNorm1d(fc_units),
             nn.ReLU(),
-            nn.Dropout(0.3),
-            nn.Linear(512, num_classes)
+            nn.Dropout(dropout_rate),
+            nn.Linear(fc_units, num_classes)
+        )
+
+    def _make_conv_block(self, in_channels, out_channels, dropout_rate):
+        return nn.Sequential(
+            nn.Conv2d(in_channels, out_channels, kernel_size=3, padding=1),
+            nn.BatchNorm2d(out_channels),
+            nn.ReLU(),
+            nn.Conv2d(out_channels, out_channels, kernel_size=3, padding=1),
+            nn.BatchNorm2d(out_channels),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2),
+            nn.Dropout(dropout_rate)
         )
 
     def forward(self, x):

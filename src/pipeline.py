@@ -51,7 +51,7 @@ class CIFAR10Pipeline:
                 base_dir=str(self.config.AUGMENTED_TRAIN_DIR)
             )
 
-    def train_model(self):
+    def train_model(self, hypertune=False):
         """Train the model"""
         print(f"Using device: {self.device}")
 
@@ -64,9 +64,14 @@ class CIFAR10Pipeline:
             device=self.device
         )
 
+        # Add hyperparameter tuning
+        self.trainer.tune_hyperparameters(train_csv=str(self.config.DATA_DIR / "train_labels.csv"),
+                                          train_dir=str(self.config.AUGMENTED_TRAIN_DIR)) if hypertune else None
+
         self.trainer.train(
             epochs=self.config.EPOCHS,
-            save_dir=str(self.config.MODELS_DIR)
+            # save_dir=str(self.config.MODELS_DIR)
+            save_dir=str("hyper-models")
         )
 
     def predict_image(self, image_path):

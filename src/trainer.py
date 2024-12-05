@@ -10,7 +10,10 @@ from tqdm import tqdm
 from modelRegularization import ModelRegularization, apply_regularization
 from dataset import CIFAR10Dataset
 from model import CIFAR10Model
-
+from sklearn.metrics import classification_report, confusion_matrix
+import seaborn as sns
+import matplotlib.pyplot as plt
+from sklearn.metrics import accuracy_score, precision_recall_fscore_support
 
 class CIFAR10Trainer:
     def __init__(self, train_csv, train_dir, batch_size=32, learning_rate=0.001,
@@ -77,6 +80,63 @@ class CIFAR10Trainer:
             l1_factor=0.0001,
             l2_factor=0.01
         )
+
+    def tune_hyperparameters(self, train_csv, train_dir):
+        """Experiment with different hyperparameters"""
+        self.train_csv = train_csv  # Store paths
+        self.train_dir = train_dir
+        configs = [
+            {
+                'optimizer': ('AdamW', {'lr': 0.001, 'weight_decay': 0.01}),
+                'conv_filters': [32, 64, 128],
+                'dropout_rate': 0.3,
+                'batch_size': 32
+            },
+            {
+                'optimizer': ('SGD', {'lr': 0.01, 'momentum': 0.9}),
+                'conv_filters': [64, 128, 256],
+                'dropout_rate': 0.5,
+                'batch_size': 64
+            },
+            {
+                'optimizer': ('Adam', {'lr': 0.0005}),
+                'conv_filters': [16, 32, 64],
+                'dropout_rate': 0.2,
+                'batch_size': 128
+            }
+        ]
+
+        results = []
+        for config in tqdm(configs, desc="Testing configurations"):
+            # Initialize model with config
+            model = CIFAR10Model(
+                num_classes=self.num_classes,
+                conv_filters=config['conv_filters'],
+                dropout_rate=config['dropout_rate']
+            ).to(self.device)
+
+            # Setup optimizer
+            opt_name, opt_params = config['optimizer']
+            optimizer_class = getattr(optim, opt_name)
+            optimizer = optimizer_class(model.parameters(), **opt_params)
+
+            # Train and evaluate
+            self.model = model
+            self.optimizer = optimizer
+            self.batch_size = config['batch_size']
+            self.setup_data(self.train_csv, self.train_dir)
+
+            # Train for fewer epochs during tuning
+            metrics = self.train(epochs=5)
+
+            results.append({
+                'config': config,
+                'metrics': metrics
+            })
+            print("Hyperparameter tuning:")
+            print(f"Config: {config}")
+
+        return results
 
     def setup_data(self, train_csv, train_dir, val_split=0.2):
         """Setup train and validation datasets and dataloaders"""
@@ -260,3 +320,65 @@ class CIFAR10Trainer:
         predictions_df.to_csv(output_csv, index=False)
         print(f"\nPredictions saved to {output_csv}")
         return predictions_df
+
+    def compute_validation_metrics(self):
+        """Compute all evaluation metrics using validation set"""
+
+        all_preds = []
+        all_labels = []
+        self.model.eval()
+
+        # Collect predictions
+        with torch.no_grad():
+            for inputs, labels in self.val_loader:
+                inputs, labels = inputs.to(self.device), labels.to(self.device)
+                outputs = self.model(inputs)
+                _, preds = outputs.max(1)
+                all_preds.extend(preds.cpu().numpy())
+                all_labels.extend(labels.cpu().numpy())
+
+        # Calculate metrics
+        accuracy = accuracy_score(all_labels, all_preds)
+        precision, recall, f1, _ = precision_recall_fscore_support(
+            all_labels, all_preds, average='weighted')
+
+        print("\nModel Performance Metrics:")
+        print(f"Overall Accuracy: {accuracy:.4f}")
+        print(f"Weighted Precision: {precision:.4f}")
+        print(f"Weighted Recall: {recall:.4f}")
+        print(f"Weighted F1-Score: {f1:.4f}")
+
+        # Detailed report and confusion matrix
+        class_names = ['airplane', 'automobile', 'bird', 'cat', 'deer',
+                       'dog', 'frog', 'horse', 'ship', 'truck']
+        report = classification_report(
+            all_labels, all_preds, target_names=class_names)
+        cm = confusion_matrix(all_labels, all_preds)
+
+        print("\nDetailed Classification Report:")
+        print(report)
+
+        # Plot confusion matrix
+        plt.figure(figsize=(10, 8))
+        sns.heatmap(cm, annot=True, fmt='d', cmap='Blues',
+                    xticklabels=class_names, yticklabels=class_names)
+        plt.title('Validation Set Confusion Matrix')
+        plt.ylabel('True Label')
+        plt.xlabel('Predicted Label')
+        plt.tight_layout()
+        plt.savefig('validation_confusion_matrix.png')
+        plt.close()
+
+        # Plot training history
+        self.regularization.plot_training_history('training_history.png')
+
+        metrics = {
+            'accuracy': accuracy,
+            'precision': precision,
+            'recall': recall,
+            'f1': f1,
+            'detailed_report': report,
+            'confusion_matrix': cm
+        }
+
+        return metrics

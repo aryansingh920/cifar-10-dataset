@@ -1,0 +1,29 @@
+Testing Configurations:
+
+Default setup:
+
+AdamW optimizer, lr = 0.001
+[32, 64, 128] filters
+dropout = 0.3
+
+
+Larger model:
+
+SGD optimizer, lr = 0.01
+[64, 128, 256] filters
+dropout = 0.5
+
+
+Smaller model:
+
+Adam optimizer, lr = 0.0005
+[16, 32, 64] filters
+dropout = 0.2
+
+
+Each configuration trains for 5 epochs and evaluates performance. The best performing configuration should be used for final training.
+The key differences are:
+
+Channel sizes(affecting model capacity)
+Dropout rates(affecting regularization)
+Optimizers and learning rates(affecting training dynamics)

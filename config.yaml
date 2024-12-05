@@ -4,7 +4,7 @@ BASE_DIR: /Users/aryansingh/Documents/CV_Practice/CV_CNN
 BATCH_SIZE: 64
 DATA_DIR: /Users/aryansingh/Documents/CV_Practice/CV_CNN/data
 DROPOUT_RATE: 0.3
-EPOCHS: 20
+EPOCHS: 10
 L1_FACTOR: 1e-6
 L2_FACTOR: 1e-4
 LEARNING_RATE: 0.001

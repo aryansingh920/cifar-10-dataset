@@ -19,12 +19,16 @@ def main():
     # Comment out if preprocessing is already done
     # pipeline.preprocess_data()
 
+
     # Step 2: Train model
-    # pipeline.train_model()
+    pipeline.train_model(hypertune=True)
 
     # Step 3: Make predictions
     pipeline.load_trained_model("models/best_model.pt")
-    predictions_df = pipeline.predict_test_directory("data/predictions.csv")
+    # metrics_report, confusion_mat = pipeline.trainer.compute_validation_metrics()
+    metrics = pipeline.trainer.compute_validation_metrics()
+    print("Validation metrics: ", metrics, "\n")
+    # predictions_df = pipeline.predict_test_directory("data/predictions.csv")
 
 
 if __name__ == "__main__":

@@ -111,3 +111,69 @@ Using device: mps
 Predicting test images: 100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████| 300000/300000 [11:42<00:00, 426.88it/s]
 
 Predictions saved to predictions.csv
+
+
+(.venv) (base) aryansingh@Aryans-MacBook-Air CV_CNN % python3.10 src/main.py
+
+Using device: mps
+
+Model Performance Metrics:
+Overall Accuracy: 0.4596
+Weighted Precision: 0.5429
+Weighted Recall: 0.4596
+Weighted F1-Score: 0.4684
+
+Detailed Classification Report:
+              precision    recall  f1-score   support
+
+    airplane       0.57      0.41      0.48      5010
+  automobile       0.83      0.36      0.50      4972
+        bird       0.38      0.39      0.38      4953
+         cat       0.22      0.53      0.31      4873
+        deer       0.45      0.36      0.40      4967
+         dog       0.44      0.36      0.40      4983
+        frog       0.58      0.58      0.58      5042
+       horse       0.71      0.41      0.52      5075
+        ship       0.46      0.80      0.58      5030
+       truck       0.77      0.39      0.52      5095
+
+    accuracy                           0.46     50000
+   macro avg       0.54      0.46      0.47     50000
+weighted avg       0.54      0.46      0.47     50000
+
+2024-12-04 23:12:34.127 Python[34154:2031150] +[IMKClient subclass]: chose IMKClient_Legacy
+2024-12-04 23:12:34.127 Python[34154:2031150] +[IMKInputSession subclass]: chose IMKInputSession_Legacy
+Validation metrics:  {'accuracy': 0.4596, 'precision': np.float64(0.5428816200624905), 'recall': np.float64(0.4596), 'f1': np.float64(0.4684058168868776), 'detailed_report': '              precision    recall  f1-score   support\n\n    airplane       0.57      0.41      0.48      5010\n  automobile       0.83      0.36      0.50      4972\n        bird       0.38      0.39      0.38      4953\n         cat       0.22      0.53      0.31      4873\n        deer       0.45      0.36      0.40      4967\n         dog       0.44      0.36      0.40      4983\n        frog       0.58      0.58      0.58      5042\n       horse       0.71      0.41      0.52      5075\n        ship       0.46      0.80      0.58      5030\n       truck       0.77      0.39      0.52      5095\n\n    accuracy                           0.46     50000\n   macro avg       0.54      0.46      0.47     50000\nweighted avg       0.54      0.46      0.47     50000\n', 'confusion_matrix': array([[2044,   33,  528,  629,   75,   40,   63,   28, 1498,   72],
+       [ 541, 1779,   67,  857,   53,   27,   97,   14, 1323,  214],
+       [ 262,    3, 1939, 1357,  417,  261,  419,   84,  195,   16],
+       [  36,    3,  330, 2583,  224, 1037,  419,  108,  101,   32],
+       [ 107,    8,  973,  881, 1800,  175,  590,  270,  124,   39],
+       [  16,    4,  407, 1921,  300, 1798,  166,  303,   54,   14],
+       [  16,    1,  429, 1187,  312,  127, 2917,    5,   42,    6],
+       [  80,   11,  282,  955,  772,  523,  131, 2100,   70,  151],
+       [ 191,   10,  148,  521,   15,    9,   67,    4, 4030,   35],
+       [ 274,  297,   38,  827,   32,  116,  122,   42, 1357, 1990]])} 
+
+
+1. Overall performance metrics:
+   - Accuracy: 45.52%
+   - Precision: 53.66%
+   - Recall: 45.52%
+   - F1-Score: 46.39%
+
+2. Class-wise performance varies significantly:
+   - Best performing: Automobile (precision: 82%)
+   - Poorest performing: Cat (precision: 22%)
+   - Most balanced: Frog (precision & recall both ~58%)
+
+3. Still missing:
+   - Confusion matrix visualization (though the code generates it)
+   - Training/validation loss plots (should be saved as 'training_history.png')
+
+These metrics suggest room for improvement, possibly through:
+- Longer training
+- Model architecture adjustments 
+- Additional regularization
+- Data augmentation refinement
+
+
