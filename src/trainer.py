@@ -14,6 +14,7 @@ from sklearn.metrics import classification_report, confusion_matrix
 import seaborn as sns
 import matplotlib.pyplot as plt
 from sklearn.metrics import accuracy_score, precision_recall_fscore_support
+from transfer_learning_model import TransferModel
 
 class CIFAR10Trainer:
     def __init__(self, train_csv, train_dir, batch_size=32, learning_rate=0.001,
@@ -263,6 +264,14 @@ class CIFAR10Trainer:
         self.regularization.plot_training_history(
             save_path=os.path.join(save_dir, 'training_history.png')
         )
+
+    def train_with_transfer(self):
+        """Train using transfer learning"""
+        self.model = TransferModel(
+            num_classes=self.num_classes).to(self.device)
+        self.optimizer = optim.AdamW(
+            self.model.parameters(), lr=0.0001)  # Lower learning rate
+        return self.train(epochs=5, save_dir='transfer-models')
 
     def save_model(self, path):
         """Save the model"""

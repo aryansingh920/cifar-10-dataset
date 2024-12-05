@@ -74,6 +74,14 @@ class CIFAR10Pipeline:
             save_dir=str("hyper-models")
         )
 
+    # In pipeline.py
+
+    def train_transfer_model(self):
+        self.trainer.train_with_transfer()
+        metrics = self.trainer.compute_validation_metrics()
+        return metrics
+
+
     def predict_image(self, image_path):
         """Make prediction for a single image"""
         if self.trainer is None:

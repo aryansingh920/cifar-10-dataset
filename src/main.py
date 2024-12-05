@@ -1,6 +1,7 @@
 from pathlib import Path
 from config import TrainingConfig
 from pipeline import CIFAR10Pipeline
+from trainer import CIFAR10Trainer
 
 
 def main():
@@ -21,13 +22,23 @@ def main():
 
 
     # Step 2: Train model
-    pipeline.train_model(hypertune=True)
+    # pipeline.train_model(hypertune=True)
+    pipeline.trainer = CIFAR10Trainer(
+        train_csv=str(config.DATA_DIR / "train_labels.csv"),
+        train_dir=str(config.AUGMENTED_TRAIN_DIR),
+        batch_size=config.BATCH_SIZE,
+        learning_rate=config.LEARNING_RATE,
+        num_classes=config.NUM_CLASSES,
+        device=pipeline.device
+    )
+
+    pipeline.train_transfer_model()
 
     # Step 3: Make predictions
-    pipeline.load_trained_model("models/best_model.pt")
+    # pipeline.load_trained_model("models/best_model.pt")
     # metrics_report, confusion_mat = pipeline.trainer.compute_validation_metrics()
-    metrics = pipeline.trainer.compute_validation_metrics()
-    print("Validation metrics: ", metrics, "\n")
+    # metrics = pipeline.trainer.compute_validation_metrics()
+    # print("Validation metrics: ", metrics, "\n")
     # predictions_df = pipeline.predict_test_directory("data/predictions.csv")
 
 
